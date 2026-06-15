@@ -6,6 +6,7 @@ const accountSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: [true, "User is required"],
+      index: true
     },
 
     status: {
@@ -22,11 +23,21 @@ const accountSchema = new mongoose.Schema(
       required: [true, "Currency is required"],
       default: "INR",
     },
+
+    balance: {
+      type: Number,
+      required: [true, "Balance is required"],
+      default: 0,
+      min: [0, "Balance cannot be negative"],
+    },
   },
   {
     timestamps: true,
   }
 );
+
+accountSchema.index({ user: 1, status: 1 });
+
 
 const AccountModel = mongoose.model("Account", accountSchema);
 
