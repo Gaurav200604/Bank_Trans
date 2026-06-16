@@ -2,6 +2,7 @@ const userModel = require('../models/user.model');
 const jwt = require('jsonwebtoken');
 
 const emailservice = require('../services/email.service');
+
 async function userRegister(req,res){
     const { email, name, password } = req.body;
 
@@ -9,8 +10,7 @@ async function userRegister(req,res){
 
     if(isUserExist){
         return res.status(422).json({
-            success:false,
-            
+            success:false,            
             message:"User already exists"
         })
     }
