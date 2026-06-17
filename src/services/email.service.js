@@ -8,26 +8,29 @@ if (missingEmailEnv.length) {
   console.warn(`Email service missing env variables: ${missingEmailEnv.join(', ')}`);
 }
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    type: 'OAuth2',
-    user: process.env.EMAIL_USER,
-    clientId: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    refreshToken: process.env.REFRESH_TOKEN,
-  },
-});
+const transporter = missingEmailEnv.length
+  ? null
+  : nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        type: 'OAuth2',
+        user: process.env.EMAIL_USER,
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
+        refreshToken: process.env.REFRESH_TOKEN,
+      },
+    });
 
-// Verify the connection configuration
-transporter.verify((error, success) => {
-  if (error) {
-    console.log("VERIFY ERROR:");
-    console.log(error);
-  } else {
-    console.log("Email server is ready");
-  }
-});
+if (transporter) {
+  transporter.verify((error, success) => {
+    if (error) {
+      console.log("VERIFY ERROR:");
+      console.log(error);
+    } else {
+      console.log("Email server is ready");
+    }
+  });
+}
 
 
 // Function to send email
@@ -57,4 +60,19 @@ async function sendregistrationEmail(useremail, name) {
 
 }
 
-module.exports = {  sendregistrationEmail };
+async function sendTransactionEmail(userEmail , name , amount , toName) {
+    const subject = 'Transaction Notification';
+    const text = `Hello ${name},\n\nA transaction has been made to ${toName} for the amount of ${amount}.\n\nBest regards,\nThe Backend Ledger Team`;
+    const html = `<p>Hello ${name},</p><p>A transaction has been made to ${toName} for the amount of ${amount}.</p><p>Best regards,<br>The Backend Ledger Team</p>`;
+    await sendEmail(userEmail , subject, text, html);
+} 
+
+async function sendTransactionFailedEmail(userEmail , name , amount , toName) {  
+    const subject = 'Transaction Failed Notification';
+    const text = `Hello ${name},\n\nA transaction to ${toName} for the amount of ${amount} has failed.\n\nBest regards,\nThe Backend Ledger Team`;
+    const html = `<p>Hello ${name},</p><p>A transaction to ${toName} for the amount of ${amount} has failed.</p><p>Best regards,<br>The Backend Ledger Team</p>`;
+    await sendEmail(userEmail, subject, text, html);
+} 
+
+
+module.exports = {  sendregistrationEmail , sendTransactionEmail , sendTransactionFailedEmail  };
